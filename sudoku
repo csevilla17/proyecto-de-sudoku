@@ -1,0 +1,133 @@
+program Sudoku;
+
+const
+  SIZE = 9;
+  BOX_SIZE = 3;
+
+type
+  SudokuBoard = array[1..SIZE, 1..SIZE] of Integer;
+
+procedure InitializeBoard(var board: SudokuBoard);
+var
+  i, j: Integer;
+begin
+  for i := 1 to SIZE do
+    for j := 1 to SIZE do
+      board[i, j] := 0;
+end;
+
+procedure PrintBoard(const board: SudokuBoard);
+var
+  i, j: Integer;
+begin
+  for i := 1 to SIZE do
+  begin
+    for j := 1 to SIZE do
+    begin
+      if board[i, j] <> 0 then
+        write(board[i, j], ' ')
+      else
+        write('. ');
+      if (j mod BOX_SIZE = 0) and (j <> SIZE) then
+        write('| ');
+    end;
+    writeln();
+    if (i mod BOX_SIZE = 0) and (i <> SIZE) then
+      writeln('------+-------+------');
+  end;
+  writeln();
+end;
+
+function IsValidMove(const board: SudokuBoard; row, col, num: Integer): Boolean;
+var
+  i, j, boxRow, boxCol: Integer;
+begin
+  // Verificar duplicados en la fila
+  for i := 1 to SIZE do
+    if (board[row, i] = num) and (i <> col) then
+    begin
+      IsValidMove := False;
+      Exit;
+    end;
+
+  // Verificar duplicados en la columna
+  for i := 1 to SIZE do
+    if (board[i, col] = num) and (i <> row) then
+    begin
+      IsValidMove := False;
+      Exit;
+    end;
+
+  // Verificar duplicados en el cuadrante
+  boxRow := BOX_SIZE * ((row - 1) div BOX_SIZE) + 1;
+  boxCol := BOX_SIZE * ((col - 1) div BOX_SIZE) + 1;
+  for i := boxRow to boxRow + BOX_SIZE - 1 do
+    for j := boxCol to boxCol + BOX_SIZE - 1 do
+      if (board[i, j] = num) and ((i <> row) or (j <> col)) then
+      begin
+        IsValidMove := False;
+        Exit;
+      end;
+
+  IsValidMove := True;
+end;
+
+function IsBoardFull(const board: SudokuBoard): Boolean;
+var
+  i, j: Integer;
+begin
+  for i := 1 to SIZE do
+    for j := 1 to SIZE do
+      if board[i, j] = 0 then
+      begin
+        IsBoardFull := False;
+        Exit;
+      end;
+  IsBoardFull := True;
+end;
+
+procedure GetUserInput(var row, col, num: Integer);
+begin
+  writeln('Ingrese la fila (1-', SIZE, '): ');
+  readln(row);
+  writeln('Ingrese la columna (1-', SIZE, '): ');
+  readln(col);
+  writeln('Ingrese el número (1-9): ');
+  readln(num);
+end;
+
+procedure PlaySudoku;
+var
+  board, solution: SudokuBoard;
+  row, col, num: Integer;
+begin
+  InitializeBoard(board);
+  // Cargar las pistas en el tablero
+  // ...
+  // Calcular la solución completa del tablero
+  // ...
+
+  repeat
+    PrintBoard(board);
+    repeat
+      GetUserInput(row, col, num);
+      if (row < 1) or (row > SIZE) or (col < 1) or (col > SIZE) or (num < 1) or (num > SIZE) then
+        writeln       ('Entrada inválida. Inténtalo de nuevo.');
+    until (row >= 1) and (row <= SIZE) and (col >= 1) and (col <= SIZE) and (num >= 1) and (num <= SIZE);
+
+    if board[row, col] <> 0 then
+      writeln('No puedes sobreescribir una pista existente.')
+    else if IsValidMove(board, row, col, num) then
+      board[row, col] := num
+    else
+      writeln('Movimiento inválido. El número ya existe en la fila, columna o cuadrante.');
+
+  until IsBoardFull(board);
+
+  PrintBoard(board);
+  writeln('¡Felicidades! Has resuelto el Sudoku.');
+end;
+
+begin
+  PlaySudoku;
+end.
